@@ -8,6 +8,13 @@ JsonObject {
     property Status status: Status {}
     property Sizes sizes: Sizes {}
 
+    property Clock clock: Clock {}
+
+    component Clock: JsonObject {
+        property bool showCalendar: true
+        property string style: "modern"  // Options: "modern", "simple"
+    }
+
     component Workspaces: JsonObject {
         property int shown: 5
         property bool rounded: true
@@ -21,6 +28,7 @@ JsonObject {
     }
 
     component Status: JsonObject {
+        property bool showNotifications: true
         property bool showAudio: false
         property bool showKbLayout: false
         property bool showNetwork: true

@@ -17,6 +17,11 @@ Item {
 
     readonly property list<var> hoverAreas: [
         {
+            name: "notifications",
+            item: notificationsIcon,
+            enabled: Config.bar.status.showNotifications
+        },
+        {
             name: "audio",
             item: audioIcon,
             enabled: Config.bar.status.showAudio
@@ -47,6 +52,30 @@ Item {
 
         anchors.horizontalCenter: parent.horizontalCenter
         spacing: Appearance.spacing.smaller / 2
+
+        // Notifications icon
+        Loader {
+            id: notificationsIcon
+
+            asynchronous: true
+            active: Config.bar.status.showNotifications
+            visible: active
+
+            sourceComponent: MaterialIcon {
+                animate: true
+                text: {
+                    if (Notifs.dnd) return "notifications_off"
+                    if (Notifs.list.length > 0) return "notifications"
+                    return "notifications_none"
+                }
+                color: Notifs.dnd ? Colours.palette.m3error : root.colour
+
+                MouseArea {
+                    anchors.fill: parent
+                    onClicked: Notifs.toggleDnd()
+                }
+            }
+        }
 
         // Audio icon
         Loader {
