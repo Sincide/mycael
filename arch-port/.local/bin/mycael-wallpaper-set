@@ -1,20 +1,31 @@
 #!/usr/bin/env bash
 # Set wallpaper using swww or hyprpaper and regenerate theme
 set -Eeuo pipefail
+IFS=$'\n\t'
 
-usage() { echo "Usage: mycael-wallpaper-set IMAGE" >&2; exit 1; }
+usage() {
+	echo "Usage: mycael-wallpaper-set IMAGE" >&2
+	exit 1
+}
 
 img="${1:-}"
-[[ -z "$img" ]] && usage
+[[ -z $img ]] && usage
+
+CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/quickshell/mycael/config"
+mkdir -p "$CONFIG_DIR"
+tmpfile=$(mktemp)
+printf '%s\n' "$img" >"$tmpfile"
+mv "$tmpfile" "$CONFIG_DIR/wallpaper.conf"
 
 if command -v swww >/dev/null 2>&1; then
-  swww img "$img"
+	swww img "$img"
 elif command -v hyprctl >/dev/null 2>&1; then
-  hyprctl hyprpaper preload "$img"
-  hyprctl hyprpaper wallpaper ,"$img"
+	hyprctl hyprpaper preload "$img"
+	hyprctl hyprpaper wallpaper ,"$img"
 else
-  echo "No wallpaper setter found" >&2
-  exit 1
+	echo "No wallpaper setter found" >&2
+	exit 1
 fi
 
-systemctl --user start mycael-matugen@"$img"
+escaped=$(systemd-escape -- "$img")
+systemctl --user start "mycael-matugen@${escaped}.service"
