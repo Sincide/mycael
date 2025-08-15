@@ -1,11 +1,16 @@
 #!/usr/bin/env bash
+# Wrapper to launch the Mycael Quickshell session
 set -Eeuo pipefail
 
 CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/quickshell/mycael"
 LOG_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/mycael/logs"
 mkdir -p "$LOG_DIR"
 
-# Load optional environment overrides
+if [[ "$#" -gt 0 && ( "$1" == "-h" || "$1" == "--help" ) ]]; then
+  echo "Usage: mycael-run [quickshell args...]" >&2
+  exit 0
+fi
+
 ENV_FILE="$CONFIG_DIR/.env"
 if [[ -f "$ENV_FILE" ]]; then
   set -a
@@ -14,8 +19,12 @@ if [[ -f "$ENV_FILE" ]]; then
   set +a
 fi
 
-# Rotate log
 LOG_FILE="$LOG_DIR/mycael.log"
 : > "$LOG_FILE"
 
-exec qs -c mycael >>"$LOG_FILE" 2>&1
+BIN="qs"
+if ! command -v "$BIN" >/dev/null 2>&1; then
+  BIN="quickshell"
+fi
+
+exec "$BIN" "$CONFIG_DIR/mycael.qml" "$@" >>"$LOG_FILE" 2>&1

@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+# Set wallpaper using swww or hyprpaper and regenerate theme
+set -Eeuo pipefail
+
+usage() { echo "Usage: mycael-wallpaper-set IMAGE" >&2; exit 1; }
+
+img="${1:-}"
+[[ -z "$img" ]] && usage
+
+if command -v swww >/dev/null 2>&1; then
+  swww img "$img"
+elif command -v hyprctl >/dev/null 2>&1; then
+  hyprctl hyprpaper preload "$img"
+  hyprctl hyprpaper wallpaper ,"$img"
+else
+  echo "No wallpaper setter found" >&2
+  exit 1
+fi
+
+systemctl --user start mycael-matugen@"$img"
