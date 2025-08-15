@@ -1,3 +1,5 @@
+// Default colors when Matugen has not yet generated a scheme
+.pragma library
 var theme = {
     primary: "#6750A4",
     onPrimary: "#FFFFFF",

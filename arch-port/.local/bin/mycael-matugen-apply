@@ -1,14 +1,15 @@
 #!/usr/bin/env bash
 # Generate theme from wallpaper using Matugen and reload Mycael
 set -Eeuo pipefail
+IFS=$'\n\t'
 
 usage() {
-  echo "Usage: mycael-matugen-apply [WALLPAPER]" >&2
-  exit 1
+	echo "Usage: mycael-matugen-apply [WALLPAPER]" >&2
+	exit 1
 }
 
 if [[ ${1:-} == "-h" || ${1:-} == "--help" ]]; then
-  usage
+	usage
 fi
 
 CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/quickshell/mycael"
@@ -20,20 +21,26 @@ LOG_FILE="$LOG_DIR/matugen.log"
 log() { printf '%s\n' "$*" >>"$LOG_FILE"; }
 
 get_wallpaper() {
-  if [[ -n ${1:-} ]]; then printf '%s\n' "$1"; return; fi
-  if command -v swww >/dev/null 2>&1; then
-    swww query 2>/dev/null | grep -oP 'image: \K.*' | head -n1 && return
-  fi
-  if command -v hyprctl >/dev/null 2>&1; then
-    hyprctl hyprpaper list 2>/dev/null | awk '{print $2}' | head -n1 && return
-  fi
-  if [[ -f "$CONFIG_DIR/config/wallpaper.conf" ]]; then
-    head -n1 "$CONFIG_DIR/config/wallpaper.conf" && return
-  fi
-  return 1
+	if [[ -n ${1:-} ]]; then
+		printf '%s\n' "$1"
+		return
+	fi
+	if command -v swww >/dev/null 2>&1; then
+		swww query 2>/dev/null | grep -oP 'image: \K.*' | head -n1 && return
+	fi
+	if command -v hyprctl >/dev/null 2>&1; then
+		hyprctl hyprpaper list 2>/dev/null | awk '{print $2}' | head -n1 && return
+	fi
+	if [[ -f "$CONFIG_DIR/config/wallpaper.conf" ]]; then
+		head -n1 "$CONFIG_DIR/config/wallpaper.conf" && return
+	fi
+	return 1
 }
 
-wallpaper=$(get_wallpaper "$1") || { log "Could not determine wallpaper"; exit 1; }
+wallpaper=$(get_wallpaper "$1") || {
+	log "Could not determine wallpaper"
+	exit 1
+}
 
 log "Generating scheme for $wallpaper"
 
@@ -41,11 +48,14 @@ tmpdir=$(mktemp -d)
 trap 'rm -rf "$tmpdir"' EXIT
 
 if ! matugen image "$wallpaper" --config "$MATUGEN_CFG" --prefix "$tmpdir" >>"$LOG_FILE" 2>&1; then
-  log "matugen failed"; exit 1; fi
+	log "matugen failed"
+	exit 1
+fi
 
-install -Dm644 "$tmpdir/quickshell/mycael/colors/colors-generated.js" "$CONFIG_DIR/colors/colors-generated.js"
-install -Dm644 "$tmpdir/quickshell/mycael/colors/qtcolors.conf" "$CONFIG_DIR/colors/qtcolors.conf"
+mkdir -p "$CONFIG_DIR/colors"
+mv "$tmpdir/quickshell/mycael/colors/colors-generated.js" "$CONFIG_DIR/colors/colors-generated.js"
+mv "$tmpdir/quickshell/mycael/colors/qtcolors.conf" "$CONFIG_DIR/colors/qtcolors.conf"
 
 if systemctl --user is-active --quiet mycael.service; then
-  systemctl --user restart mycael.service >>"$LOG_FILE" 2>&1 || true
+	systemctl --user restart mycael.service >>"$LOG_FILE" 2>&1 || true
 fi
