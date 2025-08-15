@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+
+CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/quickshell/mycael"
+LOG_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/mycael/logs"
+mkdir -p "$LOG_DIR"
+
+# Load optional environment overrides
+ENV_FILE="$CONFIG_DIR/.env"
+if [[ -f "$ENV_FILE" ]]; then
+  set -a
+  # shellcheck disable=SC1090
+  source "$ENV_FILE"
+  set +a
+fi
+
+# Rotate log
+LOG_FILE="$LOG_DIR/mycael.log"
+: > "$LOG_FILE"
+
+exec qs -c mycael >>"$LOG_FILE" 2>&1
