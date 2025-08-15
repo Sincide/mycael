@@ -3,11 +3,10 @@
 set -Eeuo pipefail
 
 SCRIPT_DIR="$(cd -- "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
-REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd -P)"
-CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
+ARCH_ROOT="$(cd "$SCRIPT_DIR/.." && pwd -P)"
 
-remove() {
-  local dest="$1" src="$2"
+remove_one() {
+  local rel="$1" src="$ARCH_ROOT/$1" dest="$HOME/$1"
   if [[ -L "$dest" && "$(readlink -f "$dest")" == "$src" ]]; then
     rm "$dest"
     echo "Removed $dest"
@@ -16,8 +15,14 @@ remove() {
   fi
 }
 
-remove "$CONFIG_HOME/quickshell/mycael" "$REPO_ROOT/arch-port/.config/quickshell/mycael"
-remove "$CONFIG_HOME/hypr/conf.d/mycael.conf" "$REPO_ROOT/arch-port/.config/hypr/mycael.conf"
-remove "$CONFIG_HOME/systemd/user/mycael.service" "$REPO_ROOT/arch-port/.config/systemd/user/mycael.service"
-remove "$HOME/.local/bin/mycael-run" "$REPO_ROOT/arch-port/.local/bin/mycael-run"
-remove "$HOME/.local/share/applications/mycael.desktop" "$REPO_ROOT/arch-port/.local/share/applications/mycael.desktop"
+remove_one .config/quickshell/mycael
+remove_one .config/hypr/conf.d/mycael.conf
+remove_one .config/systemd/user/mycael.service
+remove_one .config/systemd/user/mycael-matugen.service
+remove_one .config/systemd/user/mycael-matugen.path
+remove_one .config/systemd/user/mycael-matugen@.service
+remove_one .config/matugen
+remove_one .local/bin/mycael-run
+remove_one .local/bin/mycael-matugen-apply
+remove_one .local/bin/mycael-wallpaper-set
+remove_one .local/share/applications/mycael.desktop

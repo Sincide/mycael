@@ -1,0 +1,3 @@
+# Ignore generated color files and logs
+.config/quickshell/mycael/colors/colors-generated.js
+.local/state/mycael/

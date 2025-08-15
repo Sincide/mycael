@@ -1,61 +1,55 @@
 #!/usr/bin/env bash
-# Verify runtime dependencies for the Mycael shell
+# Verify runtime dependencies for Mycael
 set -Eeuo pipefail
 
 pass=true
 check_bin() {
-  local bin="$1"; shift
-  if ! command -v "$bin" >/dev/null 2>&1; then
-    echo "Missing: $bin $*"
-    pass=false
+  local b="$1"; shift
+  if command -v "$b" >/dev/null 2>&1; then
+    echo "Found: $b"
   else
-    echo "Found: $bin"
+    echo "Missing: $b $*"
+    pass=false
   fi
 }
 
-# Required
-check_bin qs "(quickshell)"
-check_bin hyprctl
-check_bin jq
-check_bin wl-copy "(wl-clipboard)"
-check_bin notify-send "(notifications)"
+echo "Checking required binaries..."
+for bin in qs matugen hyprctl jq inotifywait wl-copy; do
+  check_bin "$bin"
+done
 
-# Optional utilities
-for opt in grim slurp playerctl upower sensors nmcli bluetoothctl; do
+if command -v swww >/dev/null 2>&1; then
+  echo "Found: swww"
+elif command -v hyprctl >/dev/null 2>&1 && hyprctl hyprpaper list >/dev/null 2>&1; then
+  echo "Found: hyprpaper"
+else
+  echo "Missing: swww or hyprpaper"
+  pass=false
+fi
+
+for opt in playerctl grim slurp; do
   if command -v "$opt" >/dev/null 2>&1; then
     echo "Found optional: $opt"
   else
     echo "Optional missing: $opt"
   fi
+ done
 
-done
-
-# Wayland session check
 if [[ "${XDG_SESSION_TYPE:-}" != "wayland" ]]; then
-  echo "Warning: XDG_SESSION_TYPE is not wayland"
+  echo "Warning: not a Wayland session"
   pass=false
 else
   echo "Wayland session detected"
 fi
 
-# Hyprland IPC check
-if hyprctl clients >/dev/null 2>&1; then
-  echo "Hyprland IPC responding"
-else
-  echo "Warning: hyprctl not responding"
-  pass=false
-fi
-
-# Quickshell version check
-if command -v qs >/dev/null 2>&1; then
-  ver=$(qs --version 2>&1 | grep -Eo '[0-9]+\.[0-9]+\.[0-9]+' | head -n1)
-  echo "Quickshell version: $ver"
-fi
-
 if $pass; then
-  echo "All required dependencies found."
-  exit 0
+  echo "All dependencies satisfied"
 else
-  echo "Missing required dependencies."
+  cat <<PAC
+Install missing packages with:
+  sudo pacman -S --needed hyprland jq wl-clipboard inotify-tools swww grim slurp playerctl pipewire wireplumber noto-fonts noto-fonts-emoji
+AUR (yay):
+  yay -S quickshell-git matugen-bin
+PAC
   exit 1
 fi

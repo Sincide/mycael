@@ -1,0 +1,10 @@
+[config]
+version_check = false
+
+[templates.qml]
+input_path = "~/.config/matugen/templates/mycael-colors-qml.tmpl"
+output_path = "quickshell/mycael/colors/colors-generated.js"
+
+[templates.qt]
+input_path = "~/.config/matugen/templates/mycael-qtcolors.conf.tmpl"
+output_path = "quickshell/mycael/colors/qtcolors.conf"

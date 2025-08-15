@@ -1,80 +1,65 @@
-# Mycael Shell – Arch Manual Install
+# Mycael – Arch Linux Setup with Matugen
 
-This directory provides a manual, user-scope installation of the **Mycael** Quickshell desktop on Arch Linux and derivatives. No system-wide files or packaging are used.
+Mycael is a [Quickshell](https://github.com/quickshell-mirror/quickshell) desktop driven by Material You colors. This directory provides a user-scope install that works on Arch Linux and derivatives without any system packages or sudo (except for installing dependencies).
 
 ## Dependencies
-
-Install required packages before linking the configuration. Official packages can be installed with `pacman`:
-
-```bash
-sudo pacman -S --needed hyprland jq wl-clipboard grim slurp swappy dunst playerctl upower lm_sensors networkmanager bluez blueman pipewire wireplumber qt6-declarative libqalculate ttf-cascadia-code-nerd noto-fonts noto-fonts-emoji
-```
-
-AUR packages (using `yay` as an example):
+Install runtime packages. Official repos:
 
 ```bash
-yay -S quickshell-git app2unit material-symbols
+sudo pacman -S --needed hyprland jq wl-clipboard inotify-tools swww grim slurp playerctl pipewire wireplumber noto-fonts noto-fonts-emoji
 ```
 
-## Installation
+AUR (using `yay`):
 
-Clone the repo and run the dependency check:
+```bash
+yay -S quickshell-git matugen-bin ttf-cascadia-code-nerd material-symbols
+```
 
+## Install
 ```bash
 git clone https://github.com/Sincide/mycael.git
 cd mycael
 ./arch-port/scripts/check-deps.sh
-```
-
-### Mode 1 – symlink (recommended)
-
-```bash
 ./arch-port/scripts/link.sh
 ```
 
-### Mode 2 – manual copy
-
-```bash
-CONFIG="${XDG_CONFIG_HOME:-$HOME/.config}"
-mkdir -p "$CONFIG/quickshell"
-cp -r arch-port/.config/quickshell/mycael "$CONFIG/quickshell/"
-cp arch-port/.config/hypr/mycael.conf "$CONFIG/hypr/conf.d/"
-cp arch-port/.config/systemd/user/mycael.service "$CONFIG/systemd/user/"
-install -Dm755 arch-port/.local/bin/mycael-run "$HOME/.local/bin/mycael-run"
-cp arch-port/.local/share/applications/mycael.desktop "$HOME/.local/share/applications/"
-```
-
 ## Autostart
-
-### systemd --user
-
+Enable systemd units:
 ```bash
 systemctl --user daemon-reload
-enable --now mycael.service
+enable --now mycael.service mycael-matugen.path
 ```
 
-### Hyprland snippet
-Add to `~/.config/hypr/conf.d/mycael.conf`:
-
+Or for Hyprland without systemd, add to `~/.config/hypr/conf.d/mycael.conf`:
 ```conf
 exec-once = ~/.local/bin/mycael-run
 ```
 
-## Updating / rollback
+## Matugen workflow
+```
+Wallpaper ─▶ mycael-matugen-apply ─▶ matugen templates ─▶ colors-generated.js ─▶ colors-loader.qml ─▶ Quickshell reload
+```
+- `mycael-matugen-apply` detects the current wallpaper (swww or hyprpaper) and runs `matugen` with templates under `~/.config/matugen/templates`.
+- Colors are written to `~/.config/quickshell/mycael/colors/colors-generated.js` atomically.
+- `mycael` reloads to apply the new theme. If Matugen is missing, `colors-fallback.js` is used.
 
-Pull latest changes and rerun `link.sh`. Backups of replaced files are stored in `~/.local/state/mycael-backup-*`.
-
-## Smoke test
-
+Change wallpaper and recolor:
 ```bash
-mycael-run &
+mycael-wallpaper-set ~/Pictures/wall.jpg
+```
+This sets the wallpaper via `swww`/`hyprpaper` and triggers Matugen.
+
+## Validation
+1. Start shell: `mycael-run &`
+2. Change wallpaper with `mycael-wallpaper-set` or your own tool.
+3. Theme should update within a few seconds.
+
+## Uninstall
+Remove links:
+```bash
+./arch-port/scripts/unlink.sh
 ```
 
-Stop with `pkill -f mycael-run`.
+Backups of replaced files reside in `~/.local/state/mycael-backup-*`.
 
-## QA checklist
-- Bar renders at top of screen
-- Notifications appear and dismiss
-- MPRIS controls (if playerctl present) respond
-- Audio OSD changes with volume keys
-- Wallpaper picker lists images from `~/Pictures/Wallpapers`
+See `TROUBLESHOOTING.md` and `MIGRATION.md` for more help.

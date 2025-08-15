@@ -1,0 +1,9 @@
+[Unit]
+Description=Watch wallpaper changes to recolor Mycael
+
+[Path]
+PathChanged=%h/.config/quickshell/mycael/config/wallpaper.conf
+PathChanged=%h/Pictures
+
+[Install]
+WantedBy=default.target

@@ -1,0 +1,6 @@
+[Unit]
+Description=Apply Matugen theme for %I
+
+[Service]
+Type=oneshot
+ExecStart=%h/.local/bin/mycael-matugen-apply %I

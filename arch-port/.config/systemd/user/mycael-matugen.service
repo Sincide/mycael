@@ -1,12 +1,11 @@
 [Unit]
-Description=Mycael Quickshell session
+Description=Apply Matugen theme to Mycael
 After=graphical-session.target
 Wants=graphical-session.target
 
 [Service]
-ExecStart=%h/.local/bin/mycael-run
-Restart=on-failure
-RestartSec=2
+Type=oneshot
+ExecStart=%h/.local/bin/mycael-matugen-apply
 
 [Install]
 WantedBy=default.target
