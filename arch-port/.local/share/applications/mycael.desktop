@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=Mycael Shell
+Comment=Launch the Mycael Quickshell desktop
+Exec=mycael-run
+TryExec=mycael-run
+Icon=utilities-terminal
+Terminal=false
+Categories=Utility;System;
+StartupNotify=false
+OnlyShowIn=Hyprland;

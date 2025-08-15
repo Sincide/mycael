@@ -1,0 +1,15 @@
+# ~/.config/systemd/user/mycael.service
+[Unit]
+Description=Mycael Quickshell session
+Documentation=https://github.com/Sincide/mycael
+After=graphical-session.target
+Wants=graphical-session.target
+
+[Service]
+Type=simple
+ExecStart=%h/.local/bin/mycael-run
+Restart=on-failure
+RestartSec=3
+
+[Install]
+WantedBy=default.target
